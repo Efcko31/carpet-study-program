@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Парсинг ковров AMI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 500px;
+        }
+        button, a.btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        a.btn {
+            background-color: #28a745;
+        }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Управление парсером ковров</h2>
+
+    <button id="parseBtn" onclick="startParsing()">Запустить парсинг</button>
+
+    <a href="/api/carpets/export" class="btn">Скачать Excel</a>
+
+    <div id="status">Статус: Ожидание запуска</div>
+</div>
+
+<script>
+    function startParsing() {
+        const statusDiv = document.getElementById('status');
+        const parseBtn = document.getElementById('parseBtn');
+
+        statusDiv.innerText = "Статус: Идет сбор данных...";
+        statusDiv.style.color = "#ffc107"; // Желтый цвет
+        parseBtn.disabled = true;
+
+        fetch('/api/carpets/parse', { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    statusDiv.innerText = "Статус: Данные успешно собраны!";
+                    statusDiv.style.color = "#28a745"; // Зеленый цвет
+                } else {
+                    statusDiv.innerText = "Статус: Произошла ошибка при парсинге.";
+                    statusDiv.style.color = "#dc3545"; // Красный цвет
+                }
+            })
+            .catch(error => {
+                statusDiv.innerText = "Статус: Ошибка сети/сервера.";
+                statusDiv.style.color = "#dc3545";
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                parseBtn.disabled = false;
+            });
+    }
+</script>
+
+</body>
+</html>

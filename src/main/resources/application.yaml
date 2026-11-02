@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/carpet_study_program_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      connection-init-sql: "CREATE SCHEMA IF NOT EXISTS carpet_study_program_schema;"
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        hbm2ddl:
+          create-namespaces: true
+  application:
+    name: carpet-study-program

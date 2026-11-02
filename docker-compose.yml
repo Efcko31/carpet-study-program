@@ -1,0 +1,33 @@
+services:
+
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: carpet-study-program
+    environment:
+      POSTGRES_DB: carpet_study_program_db
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d carpet_study_program_db" ]
+      interval: 5s      # Проверяем каждые 5 секунд
+      timeout: 3s       # Ждём ответа 3 секунды
+      retries: 5        # Пробуем 5 раз перед тем, как считать контейнер "больным"
+    ports:
+      - "5432:5432"     # Пробрасываем порт наружу на твой ПК
+
+  # 2. Сервис нашего Spring Boot приложения
+  study-program:
+    build: .            # Собираем Dockerfile из текущей папки
+    container_name: carpet_study_program_backend
+    ports:
+      - "8080:8080"     # Доступ к приложению по порту 8080
+    depends_on:
+      postgres-db:
+        condition: service_healthy   # Приложение не запустится, пока не поднимется база
+    env_file:
+      - .env
+    environment:
+      # Переопределяем настройки подключения к БД для Spring Boot
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/carpet_study_program_db
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
